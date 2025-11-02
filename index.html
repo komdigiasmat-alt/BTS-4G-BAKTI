@@ -30,7 +30,6 @@
     #map {
       flex: 1;
       height: 100vh;
-      position: relative;
     }
     h2 {
       font-size: 18px;
@@ -50,17 +49,17 @@
     li:hover {
       background: #e9ecef;
     }
-    /* Posisi koordinat di kanan bawah */
-    #coords {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.85);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-family: monospace;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+
+    /* Label nama di atas marker */
+    .leaflet-tooltip.custom {
+      background-color: rgba(255, 255, 255, 0.85);
+      color: #000;
+      border: 1px solid #888;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
   </style>
 </head>
@@ -72,9 +71,7 @@
     </ul>
   </div>
 
-  <div id="map">
-    <div id="coords">Lat: -, Lng: -</div>
-  </div>
+  <div id="map"></div>
 
   <script>
     // Inisialisasi peta (Papua)
@@ -103,6 +100,15 @@
       onEachFeature: function (feature, layer) {
         var name = feature.properties.name || "Tanpa Nama";
         var desc = feature.properties.description || "";
+
+        // Tooltip otomatis muncul di atas marker
+        layer.bindTooltip(name, {
+          permanent: true,
+          direction: "top",
+          className: "custom"
+        });
+
+        // Popup detail tambahan saat diklik
         layer.bindPopup("<b>" + name + "</b><br>" + desc);
 
         // Tambahkan ke daftar sidebar
@@ -130,12 +136,6 @@
         alert("⚠️ Gagal memuat file KML. Pastikan link RAW benar & file publik.");
       })
       .addTo(map);
-
-    // Tampilkan koordinat di kanan bawah saat mouse bergerak
-    map.on('mousemove', function (e) {
-      document.getElementById('coords').innerHTML =
-        "Lat: " + e.latlng.lat.toFixed(5) + " | Lng: " + e.latlng.lng.toFixed(5);
-    });
   </script>
 </body>
 </html>

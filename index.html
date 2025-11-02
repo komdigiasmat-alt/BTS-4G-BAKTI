@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peta Satelit - BTS 4G BAKTI KOMINFO</title>
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Plugin untuk membaca file KML -->
+  <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+    #sidebar {
+      width: 300px;
+      height: 100vh;
+      overflow-y: auto;
+      background: #f8f9fa;
+      border-right: 1px solid #ccc;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      flex: 1;
+      height: 100vh;
+    }
+    h2 {
+      font-size: 18px;
+      text-align: center;
+      margin: 10px 0;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+    li:hover {
+      background: #e9ecef;
+    }
+    #coords {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>📍 Daftar Titik</h2>
+    <ul id="point-list">
+      <li><i>Memuat data...</i></li>
+    </ul>
+  </div>
+  <div id="map"></div>
+  <div id="coords">Lat: -, Lng: -</div>
+
+  <script>
+    // Inisialisasi peta (Papua)
+    var map = L.map('map').setView([-5.39, 138.72], 6);
+
+    // Layer satelit Esri
+    var satelit = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        maxZoom: 19,
+        attribution: 'Citra Satelit © Esri, Maxar, Earthstar Geographics'
+      }
+    ).addTo(map);
+
+    // URL file KML dari GitHub RAW
+    var kmlUrl = 'https://raw.githubusercontent.com/komdigiasmat-alt/BTS-4G-BAKTI/main/lokasi.kml';
+
+    // Sidebar daftar titik
+    var listEl = document.getElementById('point-list');
+    listEl.innerHTML = "";
+
+    // Layer untuk titik-titik dari file KML
+    var markers = [];
+
+    var customLayer = L.geoJson(null, {
+      onEachFeature: function (feature, layer) {
+        var name = feature.properties.name || "Tanpa Nama";
+        var desc = feature.properties.description || "";
+        layer.bindPopup("<b>" + name + "</b><br>" + desc);
+
+        // Tambahkan ke daftar sidebar
+        var li = document.createElement('li');
+        li.textContent = name;
+        li.onclick = function () {
+          map.setView(layer.getLatLng(), 12);
+          layer.openPopup();
+        };
+        listEl.appendChild(li);
+
+        markers.push(layer);
+      },
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, { title: feature.properties.name });
+      }
+    });
+
+    // Muat file KML ke peta
+    omnivore.kml(kmlUrl, null, customLayer)
+      .on('ready', function () {
+        map.fitBounds(customLayer.getBounds());
+      })
+      .on('error', function () {
+        alert("⚠️ Gagal memuat file KML. Pastikan link RAW benar & file publik.");
+      })
+      .addTo(map);
+
+    // Tampilkan koordinat saat kursor digerakkan
+    map.on('mousemove', function (e) {
+      document.getElementById('coords').innerHTML =
+        "Lat: " + e.latlng.lat.toFixed(5) + " | Lng: " + e.latlng.lng.toFixed(5);
+    });
+  </script>
+</body>
+</html>

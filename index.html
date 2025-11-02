@@ -30,6 +30,7 @@
     #map {
       flex: 1;
       height: 100vh;
+      position: relative;
     }
     h2 {
       font-size: 18px;
@@ -49,15 +50,17 @@
     li:hover {
       background: #e9ecef;
     }
+    /* Posisi koordinat di kanan bawah */
     #coords {
       position: absolute;
       bottom: 10px;
-      left: 10px;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 5px 10px;
-      border-radius: 5px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px 12px;
+      border-radius: 8px;
       font-size: 13px;
       font-family: monospace;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     }
   </style>
 </head>
@@ -68,8 +71,10 @@
       <li><i>Memuat data...</i></li>
     </ul>
   </div>
-  <div id="map"></div>
-  <div id="coords">Lat: -, Lng: -</div>
+
+  <div id="map">
+    <div id="coords">Lat: -, Lng: -</div>
+  </div>
 
   <script>
     // Inisialisasi peta (Papua)
@@ -126,7 +131,7 @@
       })
       .addTo(map);
 
-    // Tampilkan koordinat saat kursor digerakkan
+    // Tampilkan koordinat di kanan bawah saat mouse bergerak
     map.on('mousemove', function (e) {
       document.getElementById('coords').innerHTML =
         "Lat: " + e.latlng.lat.toFixed(5) + " | Lng: " + e.latlng.lng.toFixed(5);
